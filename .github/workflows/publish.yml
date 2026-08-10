@@ -11,57 +11,44 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
+permissions:
+  contents: write
+
 
 jobs:
 
   release_job:
 
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{steps.create_release.outputs.upload_url}}
-      release_version: ${{env.RELEASE_VERSION}}
     steps:
-    - uses: actions/checkout@v2
-    - name: Get Release tag
-      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    - uses: actions/checkout@v4
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: |
-          Precompiled ExtIO-DLL with README for Winrad/HDSDR
-
-        draft: false
-        prerelease: false
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create "${{ github.ref_name }}" \
+          --repo "${{ github.repository }}" \
+          --title "Release ${{ github.ref_name }}" \
+          --notes "Precompiled ExtIO-DLL with README for Winrad/HDSDR"
 
 
   build-on-windows:
     needs: [release_job]
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    # windows-latest or windows-2022 fail!?
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
 
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 2
         submodules:  recursive
 
-    - name: Configure Visual Studio and CMake
+    - name: Configure CMake
       working-directory: ${{runner.workspace}}
       run: |
-          # setup the compiler
-          cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat`" && set > %temp%\vcvars.txt"
-          Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
-          # run cmake, looks v141_xp Toolset requires VS 2019
-          cmake -G "Visual Studio 16 2019" -A Win32 -S ExtIO_RTL -B build_ExtIO_RTLw32
-          cmake -G "Visual Studio 16 2019" -A x64   -S ExtIO_RTL -B build_ExtIO_RTLx64
+          cmake -G "Visual Studio 17 2022" -A Win32 -S ExtIO_RTL -B build_ExtIO_RTLw32
+          cmake -G "Visual Studio 17 2022" -A x64   -S ExtIO_RTL -B build_ExtIO_RTLx64
 
     - name: Build ExtIO
       working-directory: ${{runner.workspace}}
@@ -75,21 +62,17 @@ jobs:
         cp "${{runner.workspace}}/ExtIO_RTL/README.md" ./
         cp "${{runner.workspace}}/ExtIO_RTL/COPYING" ./LICENSE
         cp "${{runner.workspace}}/build_ExtIO_RTLw32/Release/ExtIO_RTL.dll" ./
-        7z a ExtIO_RTL_x32.zip README.md LICENSE ExtIO_RTL.dll
+        7z a ExtIO_RTL_x32_${{ github.ref_name }}.zip README.md LICENSE ExtIO_RTL.dll
 
     - name: Release ExtIO Asset
-      id: upload-extio-release-asset
-      uses: actions/upload-release-asset@v1
+      working-directory: ${{runner.workspace}}
+      shell: bash
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object,
-        # which include a `upload_url`. See this blog post for more info:
-        # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        upload_url: ${{needs.release_job.outputs.upload_url}}
-        asset_path: ${{runner.workspace}}/ExtIO_RTL_x32.zip
-        asset_name: ExtIO_RTL_x32_${{needs.release_job.outputs.release_version}}.zip
-        asset_content_type: application/zip
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release upload "${{ github.ref_name }}" \
+          --repo "${{ github.repository }}" \
+          "ExtIO_RTL_x32_${{ github.ref_name }}.zip"
 
     - name: Build RTLSDR Tools for Windows
       working-directory: ${{runner.workspace}}
@@ -110,17 +93,14 @@ jobs:
         cp ExtIO_RTL/librtlsdr/README_improvements.md ./
         cp ExtIO_RTL/librtlsdr/README.rtlfm_cmdfile ./
         ls -lR >files.txt
-        7z a rtlsdr_tools.zip rtlsdr_tools_w32 rtlsdr_tools_x64 files.txt README.md README_improvements.md README.rtlfm_cmdfile
-        # ls -l
+        7z a rtlsdr_tools_${{ github.ref_name }}.zip rtlsdr_tools_w32 rtlsdr_tools_x64 files.txt README.md README_improvements.md README.rtlfm_cmdfile
 
     - name: Release rtlsdr tools Asset
-      id: upload-rtlsdr-tools-release-asset
-      uses: actions/upload-release-asset@v1
+      working-directory: ${{runner.workspace}}
+      shell: bash
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{needs.release_job.outputs.upload_url}}
-        asset_path: ${{runner.workspace}}/rtlsdr_tools.zip
-        asset_name: rtlsdr_tools_${{needs.release_job.outputs.release_version}}.zip
-        # asset_name: rtlsdr_tools.zip
-        asset_content_type: application/zip
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release upload "${{ github.ref_name }}" \
+          --repo "${{ github.repository }}" \
+          "rtlsdr_tools_${{ github.ref_name }}.zip"

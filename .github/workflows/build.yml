@@ -17,26 +17,20 @@ env:
 
 jobs:
   build-on-windows:
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    # windows-latest or windows-2022 fail!?
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
 
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 2
         submodules:  recursive
 
-    - name: Configure Visual Studio and CMake
+    - name: Configure CMake
       working-directory: ${{runner.workspace}}
       run: |
-          # setup the compiler
-          cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat`" && set > %temp%\vcvars.txt"
-          Get-Content "$env:temp\vcvars.txt" | Foreach-Object { if ($_ -match "^(.*?)=(.*)$") { Set-Content "env:\$($matches[1])" $matches[2] } }
-          # run cmake, looks v141_xp Toolset requires VS 2019
-          cmake -G "Visual Studio 16 2019" -A Win32 -S ExtIO_RTL -B build_ExtIO_RTL
+          cmake -G "Visual Studio 17 2022" -A Win32 -S ExtIO_RTL -B build_ExtIO_RTL
 
     - name: Build
       working-directory: ${{runner.workspace}}
@@ -57,11 +51,10 @@ jobs:
         cp "${{runner.workspace}}/build_ExtIO_RTL/Release/ExtIO_RTL.dll" ./
 
     - name: package and upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: extio_rtl
         path: |
             ${{runner.workspace}}/ExtIO_RTL.dll
             ${{runner.workspace}}/README.md
             ${{runner.workspace}}/LICENSE
-

@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.2.0)
-# required to enable MSVC_RUNTIME_LIBRARY
+# 3.15+ required to enable MSVC_RUNTIME_LIBRARY (CMP0091);
+# CMake 4.x refuses to configure projects declaring a minimum below 3.5
+cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0091 NEW)
 # set(CMAKE_POLICY_DEFAULT_CMP0091 NEW)
 
@@ -42,6 +43,11 @@ if (WIN32)
     if (TARGET libusb_static)
         set( LIBUSB_FOUND TRUE )
         set( LIBUSB_LIBRARIES  libusb_static )
+        if (MSVC)
+            # libusb enables /WX; newer MSVC versions add warnings (e.g. C5286)
+            # that break its build - the last /WX- on the command line wins
+            target_compile_options(libusb_static PRIVATE /WX-)
+        endif()
     endif()
 else()
     set(THREADS_PREFER_PTHREAD_FLAG ON)
