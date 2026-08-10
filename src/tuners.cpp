@@ -40,6 +40,7 @@ const char* tuners::names[tuners::N] = {
 , "R860 or R820T/2"
 , "R828D"
 , "BLOG V4 with R828D"
+, "BLOG V4 Lite with R828S"
 };
 
 const tuners::gain_t tuners::rf_gains[tuners::N] =
@@ -52,6 +53,7 @@ const tuners::gain_t tuners::rf_gains[tuners::N] =
 , { r820t_gains, sizeof(r820t_gains) / sizeof(r820t_gains[0]) }  // R820T/2
 , { r820t_gains, sizeof(r820t_gains) / sizeof(r820t_gains[0]) }  // R828D
 , { r820t_gains, sizeof(r820t_gains) / sizeof(r820t_gains[0]) }  // RTLSDR_TUNER_BLOG_V4
+, { r820t_gains, sizeof(r820t_gains) / sizeof(r820t_gains[0]) }  // RTLSDR_TUNER_BLOG_V4L
 };
 
 const tuners::gain_t tuners::if_gains[tuners::N] =
@@ -64,6 +66,7 @@ const tuners::gain_t tuners::if_gains[tuners::N] =
 , { r820t_if_gains, sizeof(r820t_if_gains) / sizeof(r820t_if_gains[0]) }  // R820T/2
 , { r820t_if_gains, sizeof(r820t_if_gains) / sizeof(r820t_if_gains[0]) }  // R828D
 , { r820t_if_gains, sizeof(r820t_if_gains) / sizeof(r820t_if_gains[0]) }  // RTLSDR_TUNER_BLOG_V4
+, { r820t_if_gains, sizeof(r820t_if_gains) / sizeof(r820t_if_gains[0]) }  // RTLSDR_TUNER_BLOG_V4L
 };
 
 
@@ -77,4 +80,5 @@ const tuners::bw_t tuners::bws[] =
 , { r820_bws, sizeof(r820_bws) / sizeof(r820_bws[0]) }  // R820T/2
 , { r820_bws, sizeof(r820_bws) / sizeof(r820_bws[0]) }  // R828D
 , { r820_bws, sizeof(r820_bws) / sizeof(r820_bws[0]) }  // RTLSDR_TUNER_BLOG_V4
+, { r820_bws, sizeof(r820_bws) / sizeof(r820_bws[0]) }  // RTLSDR_TUNER_BLOG_V4L
 };

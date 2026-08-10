@@ -15,7 +15,7 @@ struct tuners
     const int num;
   };
 
-  static constexpr unsigned N = 8;
+  static constexpr unsigned N = 9;
   static const char* names[N];
 
   static const gain_t rf_gains[N];

@@ -25,6 +25,7 @@ The ExtIO dll is a static build - including librtlsdr. Other DLLs or dependencie
   - RF gain: controls LNA and mixer
   - IF gain: controls VGA - with feedback from RTL2832U in case of enabled AGC
   - supports the RTL-SDR blog V4 dongle - based on the R828D tuner and including an HF upconverter. see  https://www.rtl-sdr.com/rtl-sdr-blog-v4-dongle-initial-release/
+  - supports the RTL-SDR blog V4 Lite dongle - based on the R828S tuner and including an HF upconverter
   - note: keep the IF-AGC / Auto-VGA off for R828D based tuners: it often produces 'pumping'
 * explicit Bias Tee and GPIO controls in the GUI
 * band configurations enabled by editing rtl_sdr_extio.cfg in your %USERPROFILE% directory

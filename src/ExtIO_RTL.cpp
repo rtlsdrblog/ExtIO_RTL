@@ -151,7 +151,7 @@ static HWND h_dialog = NULL;
 static bool isR82XX()
 {
   const int t = tunerNo;
-  return (RTLSDR_TUNER_R820T == t || RTLSDR_TUNER_R828D == t || RTLSDR_TUNER_BLOG_V4 == t);
+  return (RTLSDR_TUNER_R820T == t || RTLSDR_TUNER_R828D == t || RTLSDR_TUNER_BLOG_V4 == t || RTLSDR_TUNER_BLOG_V4L == t);
 }
 
 static int nearestSrateIdx(int srate)
